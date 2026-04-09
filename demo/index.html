@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>贪吃蛇</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <h1>贪吃蛇</h1>
+      <section class="panel">
+        <p>分数：<span id="score">0</span></p>
+        <p>最高分：<span id="best">0</span></p>
+      </section>
+      <canvas id="game" width="400" height="400" aria-label="贪吃蛇游戏画布"></canvas>
+      <p class="tips">方向键 / WASD 控制，空格键可在结束后重开。</p>
+      <p id="status" class="status"></p>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
