@@ -6,11 +6,14 @@ const scoreEl = document.getElementById("score");
 const bestEl = document.getElementById("best");
 const comboEl = document.getElementById("combo");
 const statusEl = document.getElementById("status");
+const historyListEl = document.getElementById("score-history");
 
 const GRID_COUNT = 20;
 const CELL_SIZE = canvas.width / GRID_COUNT;
 const TICK_MS = 120;
 const COMBO_WINDOW_MS = 1600;
+const SCORE_HISTORY_KEY = "snake_score_history";
+const MAX_SCORE_HISTORY = 10;
 
 let snake = [];
 let direction = { x: 1, y: 0 };
@@ -31,6 +34,55 @@ let frameTime = performance.now();
 
 bestEl.textContent = String(best);
 comboEl.textContent = "0";
+
+function getScoreHistory() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SCORE_HISTORY_KEY) || "[]");
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((item) => typeof item?.score === "number" && typeof item?.time === "number")
+      .slice(0, MAX_SCORE_HISTORY);
+  } catch {
+    return [];
+  }
+}
+
+function saveScoreHistory(entries) {
+  localStorage.setItem(SCORE_HISTORY_KEY, JSON.stringify(entries.slice(0, MAX_SCORE_HISTORY)));
+}
+
+function formatHistoryTime(ts) {
+  return new Date(ts).toLocaleString("zh-CN", {
+    hour12: false,
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function renderScoreHistory() {
+  const history = getScoreHistory();
+  if (history.length === 0) {
+    historyListEl.innerHTML = '<li class="history-item"><span>暂无记录</span><span class="history-score">--</span></li>';
+    return;
+  }
+
+  historyListEl.innerHTML = history
+    .map(
+      (item) =>
+        `<li class="history-item"><span>${formatHistoryTime(item.time)}</span><span class="history-score">${item.score}</span></li>`
+    )
+    .join("");
+}
+
+function recordScore(scoreValue) {
+  if (scoreValue <= 0) return;
+  const history = getScoreHistory();
+  history.unshift({ score: scoreValue, time: Date.now() });
+  saveScoreHistory(history);
+  renderScoreHistory();
+}
 
 function triggerClassAnimation(name) {
   appEl.classList.remove(name);
@@ -273,6 +325,7 @@ function step() {
 
   if (hitWall(head) || hitSelf(head)) {
     gameOver = true;
+    recordScore(score);
     statusEl.textContent = "游戏结束，按空格键重新开始";
     screenFlashUntil = performance.now() + 260;
     shakeUntil = performance.now() + 320;
@@ -360,5 +413,6 @@ document.addEventListener("keydown", (event) => {
 
 resetGame();
 render();
+renderScoreHistory();
 timer = setInterval(step, TICK_MS);
 requestAnimationFrame(animate);
