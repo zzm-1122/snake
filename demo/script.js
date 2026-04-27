@@ -14,7 +14,7 @@ let direction = { x: 1, y: 0 };
 let nextDirection = { x: 1, y: 0 };
 let food = { x: 0, y: 0 };
 let score = 0;
-let best = Number(localStorage.getItem("snake_best") || 0);
+let best = readBestScore();
 let gameOver = false;
 let timer = null;
 let audioCtx = null;
@@ -70,6 +70,22 @@ function playGameOverSound() {
 
 function playRestartSound() {
   playTone({ frequency: 360, slideTo: 540, duration: 0.12, type: "square", volume: 0.06 });
+}
+
+function readBestScore() {
+  try {
+    return Number(localStorage.getItem("snake_best") || 0);
+  } catch {
+    return 0;
+  }
+}
+
+function writeBestScore(value) {
+  try {
+    localStorage.setItem("snake_best", String(value));
+  } catch {
+    // Ignore storage failures so the game still runs in restricted environments.
+  }
 }
 
 function randomCell() {
@@ -171,8 +187,9 @@ function hitWall(head) {
   );
 }
 
-function hitSelf(head) {
-  return snake.some((seg) => seg.x === head.x && seg.y === head.y);
+function hitSelf(head, willGrow) {
+  const bodyToCheck = willGrow ? snake : snake.slice(0, -1);
+  return bodyToCheck.some((seg) => seg.x === head.x && seg.y === head.y);
 }
 
 function step() {
@@ -183,8 +200,9 @@ function step() {
     x: snake[0].x + direction.x,
     y: snake[0].y + direction.y,
   };
+  const willGrow = head.x === food.x && head.y === food.y;
 
-  if (hitWall(head) || hitSelf(head)) {
+  if (hitWall(head) || hitSelf(head, willGrow)) {
     gameOver = true;
     statusEl.textContent = "游戏结束，按空格键重新开始";
     playGameOverSound();
@@ -199,7 +217,7 @@ function step() {
     playEatSound();
     if (score > best) {
       best = score;
-      localStorage.setItem("snake_best", String(best));
+      writeBestScore(best);
       bestEl.textContent = String(best);
     }
     placeFood();
@@ -219,6 +237,20 @@ function setDirection(x, y) {
 
 document.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
+  const isControlKey =
+    key === "arrowup" ||
+    key === "arrowdown" ||
+    key === "arrowleft" ||
+    key === "arrowright" ||
+    key === "w" ||
+    key === "a" ||
+    key === "s" ||
+    key === "d" ||
+    key === " ";
+
+  if (isControlKey) {
+    event.preventDefault();
+  }
 
   if (gameOver && key === " ") {
     resetGame();
