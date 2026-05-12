@@ -7,17 +7,42 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <main class="app">
-      <h1>贪吃蛇</h1>
-      <section class="panel">
+    <div class="page-glow glow-a" aria-hidden="true"></div>
+    <div class="page-glow glow-b" aria-hidden="true"></div>
+
+    <main id="app" class="app">
+      <h1>贪吃蛇：街机新版</h1>
+      <!-- 分数面板会由脚本实时更新当前分数、关卡和状态。 -->
+      <section id="panel" class="panel">
         <p>分数：<span id="score">0</span></p>
         <p>最高分：<span id="best">0</span></p>
+        <p>关卡：<span id="level">1</span></p>
+        <p>速度：<span id="speed">1x</span></p>
+        <p>护盾：<span id="shield">无</span></p>
       </section>
-      <canvas id="game" width="400" height="400" aria-label="贪吃蛇游戏画布"></canvas>
-      <p class="tips">方向键 / WASD 控制，空格键可在结束后重开。</p>
+      <div class="game-shell">
+        <canvas id="game" width="400" height="400" aria-label="贪吃蛇游戏画布"></canvas>
+        <div class="scanlines" aria-hidden="true"></div>
+      </div>
+      <div class="legend" aria-label="食物说明">
+        <span><i class="dot normal"></i>食物</span>
+        <span><i class="dot gold"></i>金币</span>
+        <span><i class="dot shield"></i>护盾</span>
+        <span><i class="dot poison"></i>毒物</span>
+        <span><i class="dot boost"></i>加速</span>
+        <span><i class="dot slow"></i>缓速</span>
+      </div>
+      <div class="touch-controls" aria-label="移动端方向键">
+        <button type="button" data-dir="up" aria-label="向上">↑</button>
+        <button type="button" data-dir="left" aria-label="向左">←</button>
+        <button type="button" data-dir="down" aria-label="向下">↓</button>
+        <button type="button" data-dir="right" aria-label="向右">→</button>
+      </div>
+      <p class="tips">方向键 / WASD 控制，P 或空格暂停，结束后空格重开。</p>
       <p id="status" class="status"></p>
     </main>
 
+    <!-- 游戏逻辑独立放在脚本文件中，页面只保留基础结构。 -->
     <script src="./script.js"></script>
   </body>
 </html>
