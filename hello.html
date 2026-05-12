@@ -1,0 +1,692 @@
+<!-- create by zzm -->
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>贪吃蛇：街机新版</title>
+    <style>
+      :root {
+        --ink: #111318;
+        --paper: #fff9ed;
+        --paper-soft: #fffef8;
+        --mint: #34d399;
+        --mint-dark: #15803d;
+        --coral: #fb7185;
+        --amber: #f59e0b;
+        --sky: #0ea5e9;
+        --violet: #8b5cf6;
+        --blue: #2563eb;
+        --muted: #5d6676;
+        --grid: #182033;
+        --line: rgb(17 19 24 / 16%);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(90deg, rgb(17 19 24 / 5%) 1px, transparent 1px),
+          linear-gradient(180deg, rgb(17 19 24 / 5%) 1px, transparent 1px),
+          linear-gradient(135deg, #fff7ed 0%, #ecfeff 46%, #f6f0ff 100%);
+        background-size: 28px 28px, 28px 28px, auto;
+        color: var(--ink);
+        font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", Arial, sans-serif;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 18px 0;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+        font-weight: 900;
+      }
+
+      .brand-mark {
+        position: relative;
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        background: var(--mint);
+        box-shadow: 4px 4px 0 var(--ink);
+      }
+
+      .brand-mark::before,
+      .brand-mark::after {
+        content: "";
+        position: absolute;
+        background: var(--ink);
+      }
+
+      .brand-mark::before {
+        width: 18px;
+        height: 10px;
+        border-radius: 4px 4px 2px 4px;
+      }
+
+      .brand-mark::after {
+        right: 7px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--paper);
+      }
+
+      .nav-link,
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 46px;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        font-weight: 900;
+        box-shadow: 4px 4px 0 var(--ink);
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+
+      .nav-link {
+        padding: 0 16px;
+        background: var(--paper-soft);
+      }
+
+      .nav-link:hover,
+      .button:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 var(--ink);
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
+        gap: 44px;
+        align-items: center;
+        min-height: calc(100svh - 150px);
+        padding: 24px 0 48px;
+      }
+
+      .hero-copy {
+        max-width: 640px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 16px;
+        color: var(--mint-dark);
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .eyebrow::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border: 2px solid var(--ink);
+        border-radius: 3px;
+        background: var(--coral);
+        box-shadow: 14px 0 0 var(--amber), 28px 0 0 var(--sky);
+      }
+
+      h1 {
+        max-width: 700px;
+        margin: 0;
+        font-size: 76px;
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .summary {
+        max-width: 590px;
+        margin: 22px 0 0;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1.7;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 32px;
+      }
+
+      .button {
+        min-width: 146px;
+        padding: 0 22px;
+        font-size: 17px;
+      }
+
+      .button-primary {
+        background: var(--mint);
+      }
+
+      .button-secondary {
+        background: var(--paper-soft);
+      }
+
+      .quick-facts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 36px;
+      }
+
+      .fact {
+        border-top: 2px solid var(--line);
+        padding-top: 14px;
+      }
+
+      .fact strong {
+        display: block;
+        font-size: 23px;
+      }
+
+      .fact span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .cabinet {
+        position: relative;
+        padding: 18px;
+        border: 3px solid var(--ink);
+        border-radius: 8px;
+        background: #fef3c7;
+        box-shadow: 12px 12px 0 var(--ink);
+      }
+
+      .cabinet::before {
+        content: "";
+        position: absolute;
+        inset: 9px;
+        border: 2px solid rgb(17 19 24 / 10%);
+        border-radius: 6px;
+        pointer-events: none;
+      }
+
+      .cabinet-topbar {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .score-pill {
+        padding: 7px 10px;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        background: var(--amber);
+      }
+
+      .screen {
+        position: relative;
+        z-index: 1;
+        aspect-ratio: 1;
+        overflow: hidden;
+        border: 3px solid var(--ink);
+        border-radius: 8px;
+        background:
+          linear-gradient(90deg, rgb(255 255 255 / 7%) 1px, transparent 1px),
+          linear-gradient(180deg, rgb(255 255 255 / 7%) 1px, transparent 1px),
+          var(--grid);
+        background-size: 10% 10%;
+      }
+
+      .screen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          180deg,
+          rgb(255 255 255 / 5%) 0,
+          rgb(255 255 255 / 5%) 2px,
+          transparent 2px,
+          transparent 7px
+        );
+        pointer-events: none;
+      }
+
+      .tile {
+        position: absolute;
+        width: 10%;
+        height: 10%;
+        border: 1px solid rgb(17 19 24 / 18%);
+      }
+
+      .snake {
+        background: var(--mint);
+        box-shadow: inset 0 0 0 2px rgb(255 255 255 / 14%);
+      }
+
+      .head {
+        background: #86efac;
+      }
+
+      .head::before,
+      .head::after {
+        content: "";
+        position: absolute;
+        top: 28%;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--ink);
+      }
+
+      .head::before {
+        left: 25%;
+      }
+
+      .head::after {
+        right: 25%;
+      }
+
+      .food,
+      .gold,
+      .shield,
+      .poison,
+      .boost,
+      .slow,
+      .rock {
+        background: var(--grid);
+      }
+
+      .food::before,
+      .gold::before,
+      .shield::before,
+      .poison::before,
+      .boost::before,
+      .slow::before,
+      .rock::before {
+        content: "";
+        position: absolute;
+        inset: 23%;
+        border-radius: 50%;
+        box-shadow: 0 0 14px currentColor;
+      }
+
+      .food::before {
+        color: var(--coral);
+        background: var(--coral);
+      }
+
+      .gold::before {
+        color: #facc15;
+        background: #facc15;
+      }
+
+      .shield::before {
+        color: #67e8f9;
+        border: 4px solid #67e8f9;
+        background: transparent;
+      }
+
+      .poison::before {
+        color: var(--violet);
+        background: var(--violet);
+      }
+
+      .boost::before {
+        color: #fb923c;
+        background: #fb923c;
+        clip-path: polygon(42% 0, 100% 50%, 42% 100%, 58% 58%, 0 58%, 0 42%, 58% 42%);
+      }
+
+      .slow::before {
+        color: #93c5fd;
+        background: #93c5fd;
+      }
+
+      .rock::before {
+        inset: 16%;
+        border-radius: 4px;
+        background: #64748b;
+        box-shadow: inset 0 0 0 2px rgb(255 255 255 / 14%);
+      }
+
+      .cabinet-note {
+        position: relative;
+        z-index: 1;
+        margin: 14px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      .feature-band {
+        padding: 10px 0 66px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 18px;
+        border-top: 3px solid var(--ink);
+        padding-top: 22px;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        font-size: 34px;
+        letter-spacing: 0;
+      }
+
+      .section-title p {
+        max-width: 460px;
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .feature {
+        min-height: 172px;
+        padding: 18px;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        background: var(--paper-soft);
+        box-shadow: 5px 5px 0 var(--ink);
+      }
+
+      .feature:nth-child(2) {
+        background: #ecfeff;
+      }
+
+      .feature:nth-child(3) {
+        background: #fef3c7;
+      }
+
+      .feature:nth-child(4) {
+        background: #f3e8ff;
+      }
+
+      .feature-icon {
+        display: grid;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 14px;
+        place-items: center;
+        border: 2px solid var(--ink);
+        border-radius: 8px;
+        background: var(--mint);
+        font-weight: 900;
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      .feature:nth-child(2) .feature-icon {
+        background: var(--sky);
+      }
+
+      .feature:nth-child(3) .feature-icon {
+        background: var(--amber);
+      }
+
+      .feature:nth-child(4) .feature-icon {
+        background: var(--coral);
+      }
+
+      .feature h3 {
+        margin: 0 0 8px;
+        font-size: 21px;
+        letter-spacing: 0;
+      }
+
+      .feature p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .play-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 64px;
+        padding: 18px;
+        border: 3px solid var(--ink);
+        border-radius: 8px;
+        background: var(--blue);
+        color: white;
+        box-shadow: 8px 8px 0 var(--ink);
+      }
+
+      .play-strip p {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .play-strip .button {
+        flex: 0 0 auto;
+        background: var(--paper-soft);
+        color: var(--ink);
+      }
+
+      @media (max-width: 940px) {
+        .hero {
+          grid-template-columns: 1fr;
+          gap: 32px;
+          min-height: auto;
+          padding-top: 18px;
+        }
+
+        h1 {
+          font-size: 62px;
+        }
+
+        .cabinet {
+          max-width: 520px;
+        }
+
+        .features {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .site-header,
+        main {
+          width: min(100% - 24px, 1120px);
+        }
+
+        .site-header {
+          padding-top: 14px;
+        }
+
+        .brand {
+          font-size: 16px;
+        }
+
+        .nav-link {
+          min-height: 40px;
+          padding: 0 12px;
+        }
+
+        h1 {
+          font-size: 46px;
+        }
+
+        .summary {
+          font-size: 17px;
+        }
+
+        .quick-facts,
+        .features {
+          grid-template-columns: 1fr;
+        }
+
+        .cabinet {
+          padding: 12px;
+          box-shadow: 7px 7px 0 var(--ink);
+        }
+
+        .section-title,
+        .play-strip {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .section-title h2 {
+          font-size: 28px;
+        }
+
+        .play-strip .button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header" aria-label="站点导航">
+      <a class="brand" href="./hello.html" aria-label="贪吃蛇街机新版首页">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>贪吃蛇</span>
+      </a>
+      <a class="nav-link" href="./demo/index.html">进入游戏</a>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">街机新版，打开就开局</p>
+          <h1 id="hero-title">贪吃蛇：街机新版</h1>
+          <p class="summary">
+            一条蛇、一张 20 x 20 棋盘，加上金币、护盾、毒物、加速和缓速道具。每一局都短、快、够刺激。
+          </p>
+          <div class="actions">
+            <a class="button button-primary" href="./demo/index.html">立即开始</a>
+            <a class="button button-secondary" href="#features">浏览亮点</a>
+          </div>
+          <div class="quick-facts" aria-label="游戏信息">
+            <div class="fact">
+              <strong>6 类道具</strong>
+              <span>食物、金币、护盾、毒物、加速、缓速</span>
+            </div>
+            <div class="fact">
+              <strong>关卡成长</strong>
+              <span>分数越高，速度和障碍越有压迫感</span>
+            </div>
+            <div class="fact">
+              <strong>本地最高分</strong>
+              <span>刷新记录会保存在当前浏览器</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="cabinet" aria-label="游戏画面预览">
+          <div class="cabinet-topbar">
+            <span>ARCADE PREVIEW</span>
+            <span class="score-pill">SCORE 128</span>
+          </div>
+          <div class="screen" aria-hidden="true">
+            <span class="tile food" style="left: 20%; top: 0%"></span>
+            <span class="tile shield" style="left: 70%; top: 0%"></span>
+            <span class="tile rock" style="left: 50%; top: 10%"></span>
+            <span class="tile snake" style="left: 30%; top: 20%"></span>
+            <span class="tile snake" style="left: 40%; top: 20%"></span>
+            <span class="tile head" style="left: 50%; top: 20%"></span>
+            <span class="tile snake" style="left: 30%; top: 30%"></span>
+            <span class="tile poison" style="left: 80%; top: 30%"></span>
+            <span class="tile gold" style="left: 10%; top: 40%"></span>
+            <span class="tile snake" style="left: 30%; top: 40%"></span>
+            <span class="tile snake" style="left: 30%; top: 50%"></span>
+            <span class="tile snake" style="left: 40%; top: 50%"></span>
+            <span class="tile snake" style="left: 50%; top: 50%"></span>
+            <span class="tile boost" style="left: 70%; top: 50%"></span>
+            <span class="tile rock" style="left: 20%; top: 60%"></span>
+            <span class="tile snake" style="left: 50%; top: 60%"></span>
+            <span class="tile slow" style="left: 20%; top: 70%"></span>
+            <span class="tile snake" style="left: 50%; top: 70%"></span>
+            <span class="tile snake" style="left: 60%; top: 70%"></span>
+            <span class="tile snake" style="left: 70%; top: 70%"></span>
+            <span class="tile food" style="left: 40%; top: 90%"></span>
+          </div>
+          <p class="cabinet-note">预览保留真实游戏的核心元素：路线规划、限时道具、障碍压迫和连续得分反馈。</p>
+        </aside>
+      </section>
+
+      <section id="features" class="feature-band" aria-label="游戏亮点">
+        <div class="section-title">
+          <h2>一局更有变化</h2>
+          <p>首页只做一件事：把玩家带到真正的游戏里，同时让他们一眼看懂这不是最朴素的贪吃蛇。</p>
+        </div>
+
+        <div class="features">
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">1</span>
+            <h3>多食物节奏</h3>
+            <p>金币拉高收益，毒物制造取舍，加速和缓速让路线判断更紧张。</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">2</span>
+            <h3>护盾容错</h3>
+            <p>护盾能抵消一次撞击，让危险路线多一个翻盘机会。</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">3</span>
+            <h3>关卡障碍</h3>
+            <p>分数提升后会出现更多障碍，熟练玩家也需要重新规划路线。</p>
+          </article>
+          <article class="feature">
+            <span class="feature-icon" aria-hidden="true">4</span>
+            <h3>随处开玩</h3>
+            <p>键盘和移动端方向键都已准备好，页面打开后无需安装。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="play-strip" aria-label="开始游戏">
+        <p>准备好刷新本地最高分了吗？</p>
+        <a class="button" href="./demo/index.html">启动街机</a>
+      </section>
+    </main>
+  </body>
+</html>
