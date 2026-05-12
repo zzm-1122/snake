@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>贪吃蛇：街机新版 | 官方首页</title>
+    <style>
+      :root {
+        --bg: #080b12;
+        --surface: #101723;
+        --surface-2: #151f2d;
+        --line: rgb(149 167 196 / 18%);
+        --text: #f4f7fb;
+        --muted: #9caec7;
+        --green: #4ade80;
+        --cyan: #67e8f9;
+        --rose: #fb7185;
+        --gold: #facc15;
+        --orange: #fb923c;
+        --purple: #a78bfa;
+        --blue: #60a5fa;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(90deg, rgb(255 255 255 / 3%) 1px, transparent 1px),
+          linear-gradient(180deg, rgb(255 255 255 / 3%) 1px, transparent 1px),
+          radial-gradient(circle at 18% 14%, rgb(103 232 249 / 20%), transparent 30%),
+          radial-gradient(circle at 82% 10%, rgb(74 222 128 / 15%), transparent 28%),
+          linear-gradient(180deg, #111827 0%, var(--bg) 54%, #05070c 100%);
+        background-size: 42px 42px, 42px 42px, auto, auto, auto;
+        color: var(--text);
+        font-family: Inter, "PingFang SC", "Noto Sans SC", "Microsoft YaHei", Arial, sans-serif;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 24px 0;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      .brand-mark {
+        position: relative;
+        width: 38px;
+        height: 38px;
+        border: 1px solid rgb(103 232 249 / 42%);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 68% 32%, var(--cyan) 0 7%, transparent 8%),
+          linear-gradient(135deg, rgb(74 222 128 / 96%), rgb(20 184 166 / 72%));
+        box-shadow: 0 0 26px rgb(74 222 128 / 22%);
+      }
+
+      .brand-mark::before {
+        content: "";
+        position: absolute;
+        left: 9px;
+        top: 13px;
+        width: 20px;
+        height: 11px;
+        border-radius: 5px 5px 3px 5px;
+        background: #07100c;
+        box-shadow: 9px 0 0 #07100c;
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav a {
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .nav a:hover {
+        border-color: var(--line);
+        color: var(--text);
+        background: rgb(255 255 255 / 5%);
+      }
+
+      .nav .play-link {
+        display: inline-flex;
+        align-items: center;
+        color: #05110b;
+        background: var(--green);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 500px);
+        gap: 56px;
+        align-items: center;
+        min-height: calc(100svh - 104px);
+        padding: 34px 0 76px;
+      }
+
+      .label {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+        color: var(--cyan);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      .label::before {
+        content: "";
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 18px var(--green);
+      }
+
+      h1 {
+        max-width: 740px;
+        margin: 0;
+        font-size: 74px;
+        line-height: 0.98;
+        letter-spacing: 0;
+      }
+
+      .lead {
+        max-width: 650px;
+        margin: 24px 0 0;
+        color: var(--muted);
+        font-size: 20px;
+        line-height: 1.72;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 34px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 52px;
+        padding: 0 22px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 800;
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        border-color: rgb(103 232 249 / 58%);
+      }
+
+      .button-primary {
+        border-color: transparent;
+        color: #06120c;
+        background: var(--green);
+        box-shadow: 0 14px 40px rgb(74 222 128 / 22%);
+      }
+
+      .button-secondary {
+        background: rgb(255 255 255 / 5%);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 44px;
+      }
+
+      .metric {
+        min-height: 96px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgb(16 23 35 / 72%);
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 28px;
+      }
+
+      .metric span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .showcase {
+        position: relative;
+        padding: 18px;
+        border: 1px solid rgb(103 232 249 / 28%);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgb(21 31 45 / 92%), rgb(8 11 18 / 92%)),
+          var(--surface);
+        box-shadow:
+          0 26px 80px rgb(0 0 0 / 44%),
+          0 0 70px rgb(103 232 249 / 10%);
+      }
+
+      .showcase::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        background: linear-gradient(135deg, rgb(103 232 249 / 45%), transparent 34%, rgb(74 222 128 / 36%));
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        padding: 1px;
+        pointer-events: none;
+      }
+
+      .screen-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 14px;
+      }
+
+      .screen-title {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .status-pill {
+        min-height: 30px;
+        padding: 6px 10px;
+        border: 1px solid rgb(74 222 128 / 30%);
+        border-radius: 8px;
+        color: var(--green);
+        background: rgb(74 222 128 / 10%);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .game-screen {
+        position: relative;
+        aspect-ratio: 1;
+        overflow: hidden;
+        border: 1px solid rgb(149 167 196 / 22%);
+        border-radius: 8px;
+        background:
+          linear-gradient(90deg, rgb(255 255 255 / 5%) 1px, transparent 1px),
+          linear-gradient(180deg, rgb(255 255 255 / 5%) 1px, transparent 1px),
+          #111827;
+        background-size: 10% 10%;
+      }
+
+      .game-screen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 18%, rgb(0 0 0 / 12%));
+        pointer-events: none;
+      }
+
+      .tile {
+        position: absolute;
+        width: 10%;
+        height: 10%;
+      }
+
+      .snake {
+        border-radius: 4px;
+        background: var(--green);
+        box-shadow: 0 0 18px rgb(74 222 128 / 34%);
+      }
+
+      .head {
+        border-radius: 4px;
+        background: #86efac;
+      }
+
+      .head::before,
+      .head::after {
+        content: "";
+        position: absolute;
+        top: 30%;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #07100c;
+      }
+
+      .head::before {
+        left: 25%;
+      }
+
+      .head::after {
+        right: 25%;
+      }
+
+      .item::before,
+      .rock::before {
+        content: "";
+        position: absolute;
+        inset: 22%;
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 16px currentColor;
+      }
+
+      .food {
+        color: var(--rose);
+      }
+
+      .gold {
+        color: var(--gold);
+      }
+
+      .shield {
+        color: var(--cyan);
+      }
+
+      .shield::before {
+        border: 4px solid currentColor;
+        background: transparent;
+      }
+
+      .boost {
+        color: var(--orange);
+      }
+
+      .slow {
+        color: var(--blue);
+      }
+
+      .poison {
+        color: var(--purple);
+      }
+
+      .rock::before {
+        inset: 16%;
+        border-radius: 4px;
+        color: #64748b;
+        box-shadow: inset 0 0 0 2px rgb(255 255 255 / 12%);
+      }
+
+      .screen-footer {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .chip {
+        min-height: 58px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgb(255 255 255 / 4%);
+      }
+
+      .chip b {
+        display: block;
+        font-size: 15px;
+      }
+
+      .chip span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .section {
+        padding: 20px 0 84px;
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 22px;
+        padding-top: 30px;
+        border-top: 1px solid var(--line);
+      }
+
+      .section-heading h2 {
+        margin: 0;
+        font-size: 36px;
+        letter-spacing: 0;
+      }
+
+      .section-heading p {
+        max-width: 500px;
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .feature-card {
+        min-height: 178px;
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 2%)),
+          var(--surface);
+      }
+
+      .feature-card i {
+        display: block;
+        width: 34px;
+        height: 34px;
+        margin-bottom: 18px;
+        border-radius: 8px;
+        background: var(--accent);
+        box-shadow: 0 0 22px color-mix(in srgb, var(--accent), transparent 58%);
+      }
+
+      .feature-card h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        letter-spacing: 0;
+      }
+
+      .feature-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.62;
+      }
+
+      .launch {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 22px;
+        align-items: center;
+        margin-bottom: 72px;
+        padding: 24px;
+        border: 1px solid rgb(74 222 128 / 26%);
+        border-radius: 8px;
+        background:
+          radial-gradient(circle at 90% 20%, rgb(74 222 128 / 18%), transparent 28%),
+          linear-gradient(135deg, rgb(16 23 35 / 96%), rgb(8 11 18 / 96%));
+      }
+
+      .launch h2 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .launch p {
+        margin: 8px 0 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      @media (max-width: 980px) {
+        .hero {
+          grid-template-columns: 1fr;
+          min-height: auto;
+          gap: 36px;
+        }
+
+        h1 {
+          font-size: 60px;
+        }
+
+        .showcase {
+          max-width: 560px;
+        }
+
+        .feature-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 680px) {
+        .shell {
+          width: min(100% - 24px, 1180px);
+        }
+
+        .site-header {
+          align-items: flex-start;
+          flex-direction: column;
+          padding-top: 16px;
+        }
+
+        .nav {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .nav a {
+          padding: 0 10px;
+          font-size: 13px;
+        }
+
+        h1 {
+          font-size: 43px;
+        }
+
+        .lead {
+          font-size: 17px;
+        }
+
+        .metrics,
+        .screen-footer,
+        .feature-grid,
+        .launch {
+          grid-template-columns: 1fr;
+        }
+
+        .section-heading {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .launch .button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header shell" aria-label="官方导航">
+      <a class="brand" href="./hello2.html" aria-label="贪吃蛇街机新版官方首页">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Snake Arcade</span>
+      </a>
+      <nav class="nav" aria-label="页面导航">
+        <a href="#features">玩法</a>
+        <a href="./hello.html">复古版首页</a>
+        <a class="play-link" href="./demo/index.html">立即开局</a>
+      </nav>
+    </header>
+
+    <main class="shell">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <p class="label">Official Game Site</p>
+          <h1 id="hero-title">贪吃蛇：街机新版</h1>
+          <p class="lead">
+            面向快节奏休闲玩家的官方入口页。20 x 20 棋盘、多食物策略、护盾容错、关卡障碍和本地最高分，让每一局都有新的路线判断。
+          </p>
+          <div class="actions">
+            <a class="button button-primary" href="./demo/index.html">开始游戏</a>
+            <a class="button button-secondary" href="#features">查看系统</a>
+          </div>
+          <div class="metrics" aria-label="游戏亮点概览">
+            <div class="metric">
+              <strong>20 x 20</strong>
+              <span>清晰紧凑的街机棋盘</span>
+            </div>
+            <div class="metric">
+              <strong>6</strong>
+              <span>食物与道具类型</span>
+            </div>
+            <div class="metric">
+              <strong>0 安装</strong>
+              <span>浏览器打开即可游玩</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="showcase" aria-label="游戏预览">
+          <div class="screen-header">
+            <span class="screen-title">LIVE BOARD PREVIEW</span>
+            <span class="status-pill">READY</span>
+          </div>
+          <div class="game-screen" aria-hidden="true">
+            <span class="tile item food" style="left: 20%; top: 0%"></span>
+            <span class="tile item shield" style="left: 70%; top: 0%"></span>
+            <span class="tile rock" style="left: 50%; top: 10%"></span>
+            <span class="tile snake" style="left: 30%; top: 20%"></span>
+            <span class="tile snake" style="left: 40%; top: 20%"></span>
+            <span class="tile head" style="left: 50%; top: 20%"></span>
+            <span class="tile snake" style="left: 30%; top: 30%"></span>
+            <span class="tile item poison" style="left: 80%; top: 30%"></span>
+            <span class="tile item gold" style="left: 10%; top: 40%"></span>
+            <span class="tile snake" style="left: 30%; top: 40%"></span>
+            <span class="tile snake" style="left: 30%; top: 50%"></span>
+            <span class="tile snake" style="left: 40%; top: 50%"></span>
+            <span class="tile snake" style="left: 50%; top: 50%"></span>
+            <span class="tile item boost" style="left: 70%; top: 50%"></span>
+            <span class="tile rock" style="left: 20%; top: 60%"></span>
+            <span class="tile snake" style="left: 50%; top: 60%"></span>
+            <span class="tile item slow" style="left: 20%; top: 70%"></span>
+            <span class="tile snake" style="left: 50%; top: 70%"></span>
+            <span class="tile snake" style="left: 60%; top: 70%"></span>
+            <span class="tile snake" style="left: 70%; top: 70%"></span>
+            <span class="tile item food" style="left: 40%; top: 90%"></span>
+          </div>
+          <div class="screen-footer" aria-label="预览数据">
+            <div class="chip">
+              <b>Score 128</b>
+              <span>连吃奖励</span>
+            </div>
+            <div class="chip">
+              <b>Level 04</b>
+              <span>障碍生成</span>
+            </div>
+            <div class="chip">
+              <b>Shield x1</b>
+              <span>撞击保护</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <section id="features" class="section" aria-label="核心玩法">
+        <div class="section-heading">
+          <h2>官方玩法系统</h2>
+          <p>页面用更克制的产品官网语言呈现游戏能力：不是说明书，而是把玩家带到下一局。</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card" style="--accent: var(--rose)">
+            <i aria-hidden="true"></i>
+            <h3>多食物</h3>
+            <p>普通食物稳定成长，金币带来额外分数，毒物让路线选择更有代价。</p>
+          </article>
+          <article class="feature-card" style="--accent: var(--cyan)">
+            <i aria-hidden="true"></i>
+            <h3>护盾</h3>
+            <p>获得护盾后可抵消一次撞墙、自撞或障碍碰撞，给高风险路线一次机会。</p>
+          </article>
+          <article class="feature-card" style="--accent: var(--orange)">
+            <i aria-hidden="true"></i>
+            <h3>速度变化</h3>
+            <p>加速和缓速道具改变节奏，每一次转向都更接近街机反应挑战。</p>
+          </article>
+          <article class="feature-card" style="--accent: var(--blue)">
+            <i aria-hidden="true"></i>
+            <h3>关卡障碍</h3>
+            <p>分数提升后进入更高关卡，地图开始生成障碍，空间控制更重要。</p>
+          </article>
+          <article class="feature-card" style="--accent: var(--green)">
+            <i aria-hidden="true"></i>
+            <h3>本地记录</h3>
+            <p>最高分保存在当前浏览器，适合反复挑战自己的最佳路线。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="launch" aria-label="启动游戏">
+        <div>
+          <h2>准备进入棋盘</h2>
+          <p>支持方向键、WASD、暂停继续和移动端虚拟方向键。</p>
+        </div>
+        <a class="button button-primary" href="./demo/index.html">启动游戏</a>
+      </section>
+    </main>
+  </body>
+</html>
